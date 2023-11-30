@@ -1,0 +1,56 @@
+import sys
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton
+import pyttsx3
+
+def speak(text):
+    engine = pyttsx3.init()
+    engine.say(text)
+    engine.runAndWait()
+
+def process_command(command):
+    # You can implement the logic to process different commands here
+    # For now, let's just return a simple response
+    return "You said: " + command
+
+class JarvisAssistant(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Jarvis Voice Assistant")
+        self.setGeometry(500, 200, 400, 300)
+        self.setStyleSheet("background-color: #1e1e1e; color: white;")
+
+        layout = QVBoxLayout()
+
+        label = QLabel("Ask L.A.V.A something:")
+        label.setAlignment(Qt.AlignCenter)
+        label.setFont(QFont("Arial", 12))
+        label.setStyleSheet("margin-bottom: 20px;")
+
+        self.entry = QLineEdit()
+        self.entry.setStyleSheet("background-color: #313131; color: white;")
+        self.entry.returnPressed.connect(self.get_input)
+
+        button = QPushButton("Ask")
+        button.clicked.connect(self.get_input)
+        button.setStyleSheet("background-color: #313131; color: white;")
+
+        layout.addWidget(label)
+        layout.addWidget(self.entry)
+        layout.addWidget(button)
+
+        self.setLayout(layout)
+
+    def get_input(self):
+        user_input = self.entry.text()
+        self.entry.clear()
+        response = process_command(user_input)
+        if response:
+            speak(response)
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    jarvis = JarvisAssistant()
+    jarvis.show()
+    sys.exit(app.exec_())
