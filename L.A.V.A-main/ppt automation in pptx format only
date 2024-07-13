@@ -1,0 +1,91 @@
+import speech_recognition as sr
+import os
+import pyautogui
+import time
+import pyttsx3
+
+def speak(text):
+    engine = pyttsx3.init()
+    engine.say(text)
+    engine.runAndWait()
+
+def recognize_speech():
+    recognizer = sr.Recognizer()
+
+    with sr.Microphone() as source:
+        print("Assistant: Please say a command or 'exit' to stop.")
+        speak("Please say a command or 'exit' to stop.")
+        recognizer.adjust_for_ambient_noise(source, duration=1)
+        audio = recognizer.listen(source)
+
+    try:
+        print("Recognizing...")
+        text = recognizer.recognize_google(audio)
+        print(f"You: {text}")
+        return text.lower()
+    except sr.UnknownValueError:
+        print("Assistant: I couldn't understand your command.")
+        speak("I couldn't understand your command.")
+        return None
+    except sr.RequestError as e:
+        print(f"Assistant: Unable to request results from Google Speech Recognition service; {e}")
+        speak("Unable to request results from Google Speech Recognition service.")
+        return None
+
+def control_powerpoint(command, presentation_path):
+    if "open" in command:
+        # Open the specified PowerPoint presentation
+        os.startfile(presentation_path)
+        print(f"Assistant: Opening Presentation:")
+        speak(f"Opening Presentation:")
+    elif "next" in command:
+        pyautogui.hotkey("right")
+        print("Assistant: Next Slide.")
+        speak("Next Slide.")
+    elif "previous" in command:
+        pyautogui.hotkey("left")
+        print("Assistant: Previous Slide.")
+        speak("Previous Slide.")
+    elif "start" in command:
+        pyautogui.hotkey("f5")
+        print("Assistant: Starting Slide Show.")
+        speak("Starting Slide Show.")
+    elif "end" in command:
+        pyautogui.hotkey("esc")
+        print("Assistant: Ending Slide Show.")
+        speak("Ending Slide Show.")
+    elif "exit" in command:
+        print("Assistant: Exiting...")
+        speak("Exiting. Have a great day!")
+        return False
+    else:
+        print("Assistant: Command not recognized.")
+        speak("Command not recognized.")
+    return True
+
+def main():
+    # Specify the PowerPoint presentation path
+    presentation_path = r"D:\programing\HTML\HTML Training\WTL8.CSSFONT&TEXT.pptx"
+
+    if os.path.exists(presentation_path):
+        print(f"Assistant: Loaded Presentation: ")
+        speak(f"Loaded Presentation: )
+    else:
+        print(f"Assistant: Presentation not found: ")
+        speak(f"Presentation not found: ")
+        return
+
+    while True:
+        command = recognize_speech()
+
+        if command is None:
+            continue
+
+        if not control_powerpoint(command, presentation_path):
+            break
+
+        # Add a delay between commands
+        time.sleep(2)
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,40 @@
+import speech_recognition as sr
+import pyautogui
+import subprocess
+
+def start_powerpoint():
+    # Change the path to PowerPoint executable if necessary
+    subprocess.Popen(["C:\\Program Files\\Microsoft Office\\root\\Office16\\POWERPNT.EXE"])
+
+def next_slide():
+    pyautogui.hotkey('right')
+
+def previous_slide():
+    pyautogui.hotkey('left')
+
+def main():
+    recognizer = sr.Recognizer()
+
+    with sr.Microphone() as source:
+        print("Say something to control PowerPoint:")
+        recognizer.adjust_for_ambient_noise(source)
+
+        while True:
+            try:
+                audio = recognizer.listen(source)
+                command = recognizer.recognize_google(audio).lower()
+
+                if "start" in command:
+                    start_powerpoint()
+                elif "next" in command:
+                    next_slide()
+                elif "previous" in command:
+                    previous_slide()
+
+            except sr.UnknownValueError:
+                pass
+            except sr.RequestError as e:
+                print(f"Error with speech recognition service; {e}")
+
+if __name__ == "__main__":
+    main()

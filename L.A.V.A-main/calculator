@@ -1,0 +1,57 @@
+import speech_recognition as sr
+from transformers import pipeline
+
+def calculate_expression(expression):
+    try:
+        result = eval(expression)
+        return result
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+def process_voice_command(command):
+    calculator_keywords = ["calculate", "what is", "evaluate", "solve"]
+    
+    for keyword in calculator_keywords:
+        if keyword in command.lower():
+            expression = command.replace(keyword, "").strip()
+            return calculate_expression(expression)
+    
+    return None
+
+def text_to_speech(text):
+    try:
+        subprocess.run(["powershell", f"Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('{text}')"])
+    except Exception as e:
+        print(f"Error executing text-to-speech command: {str(e)}")
+
+def main():
+    recognizer = sr.Recognizer()
+    text_generator = pipeline("text2text-generation", model="t5-base", device=0)  # Use T5 model for text generation
+
+    with sr.Microphone() as source:
+        print("Say something:")
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+
+    try:
+        # Using Google Web Speech API for speech-to-text
+        command = recognizer.recognize_google(audio)
+        print(f"Command: {command}")
+
+        # Process the voice command and get the result
+        result = process_voice_command(command)
+
+        if result is not None:
+            print(f"Result: {result}")
+            # Convert the result to spoken words
+            response = text_generator(f"The result is: {result}")[0]['generated_text']
+            print(response)
+            text_to_speech(response)
+
+    except sr.UnknownValueError:
+        print("Speech Recognition could not understand audio")
+    except sr.RequestError as e:
+        print(f"Could not request results from Google Web Speech Recognition service; {e}")
+
+if __name__ == "__main__":
+    main()
